@@ -1,0 +1,22 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Project outputs / models
+model_saved/
+outputs/
+
+# Data files - Z24 dataset and pickles
+Data/Z24/
+train_Z24.p
+valid_Z24.p
+
+# Editor
+.vscode/
+.DS_Store
+
+Z24/
