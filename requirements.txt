@@ -1,0 +1,16 @@
+
+# Dependencies required to run the notebook and training scripts
+# Versions chosen to be compatible with TensorFlow 2.10.1 (adjust if you use a different TF build)
+numpy>=1.23.0
+scipy>=1.9.0
+pandas>=1.5.0
+matplotlib>=3.5.0
+seaborn>=0.12.0
+scikit-learn>=1.1.0
+tensorflow==2.10.1
+
+# Optional / useful
+# ipython (already present in Jupyter environment)
+# joblib (if you need faster model persistence)
+joblib>=1.2.0
+
