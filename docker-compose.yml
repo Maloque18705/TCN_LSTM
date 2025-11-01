@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  trainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tcn_lstm:latest
+    command: ["python", "main.py", "--epochs", "100", "--batch-size", "64", "--outdir", "/app/outputs"]
+    volumes:
+      - ./:/app:delegated      # mount project (code + Data). Use delegated for macOS performance.
+      - ./outputs:/app/outputs # persist outputs to host
+      - ./Data:/app/Data      # optionally mount data folder
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: "no"
+
+# Notes:
+# - This compose file runs the CPU image built from the Dockerfile in this repo.
+# - To rebuild after code changes: docker-compose up --build
+# - For GPU support, replace the base image with a TensorFlow GPU image and run with
+#   the appropriate runtime (e.g. use Docker CLI flags `--gpus` or use a GPU-enabled compose setup).
