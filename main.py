@@ -17,7 +17,7 @@ from Train.train import train
 
 def parse_args():
     p = argparse.ArgumentParser(description="Train TCN model and save artifacts")
-    p.add_argument("--epochs", type=int, default=1000, help="Maximum number of epochs")
+    p.add_argument("--epochs", type=int, default=100, help="Maximum number of epochs")
     p.add_argument("--batch-size", type=int, default=64, help="Batch size for training")
     p.add_argument("--outdir", type=str, default="./outputs", help="Base output directory")
     p.add_argument("--no-save", action="store_true", help="Do not save artifacts (for quick tests)")

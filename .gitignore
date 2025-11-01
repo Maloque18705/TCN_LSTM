@@ -12,8 +12,6 @@ outputs/
 
 # Data files - Z24 dataset and pickles
 Data/Z24/
-train_Z24.p
-valid_Z24.p
 
 # Editor
 .vscode/

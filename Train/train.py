@@ -13,7 +13,7 @@ from Model.model import TCN_Model
 from tensorflow.keras.callbacks import EarlyStopping, CSVLogger
 
 
-def train(epochs: int = 1000, batch_size: int = 64, save_dir: str = "."):
+def train(epochs: int = 100, batch_size: int = 64, save_dir: str = "."):
 	"""End-to-end training routine based on the notebook.
 
 	Steps:
