@@ -105,7 +105,7 @@ def train(epochs: int = 100, batch_size: int = 64, save_dir: str = "."):
 			f.write(str(training_time))
 
 	# 8) Save model and history
-	model.save(str(save_path / "model_saved"), save_format="tf")
+	model.save(str(save_path / "model_saved.keras"))
 	with open(save_path / "history_saved.pkl", "wb") as f:
 		pickle.dump(history.history, f)
 
