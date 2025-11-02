@@ -26,7 +26,7 @@ from Data import config
 
 def parse_args():
     p = argparse.ArgumentParser(description="Train LSTM model and save artifacts")
-    p.add_argument("--epochs", type=int, default=20, help="Maximum number of epochs")
+    p.add_argument("--epochs", type=int, default=100, help="Maximum number of epochs")
     p.add_argument("--batch-size", type=int, default=64, help="Batch size for training")
     p.add_argument("--outdir", type=str, default="./outputs", help="Base output directory")
     p.add_argument("--limit-samples", type=int, default=None, help="Limit total samples for faster runs")
