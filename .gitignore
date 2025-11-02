@@ -1,6 +1,7 @@
 
 # Python cache
 __pycache__/
+
 *.py[cod]
 
 # Jupyter
@@ -12,7 +13,7 @@ outputs/
 
 # Data files - Z24 dataset and pickles
 Data/Z24/
-
+Data/Z24/__pycache__
 # Editor
 .vscode/
 .DS_Store
