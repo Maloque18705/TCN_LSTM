@@ -22,7 +22,7 @@ def parse_args():
     p = argparse.ArgumentParser(description="Train TCN model and save artifacts")
     p.add_argument("--epochs", type=int, default=100, help="Maximum number of epochs")
     p.add_argument("--batch-size", type=int, default=64, help="Batch size for training")
-    p.add_argument("--outdir", type=str, default="./outputs", help="Base output directory")
+    p.add_argument("--outdir", type=str, default="./outputs/tcn_lstm", help="Base output directory")
     p.add_argument("--no-save", action="store_true", help="Do not save artifacts (for quick tests)")
     return p.parse_args()
 
@@ -34,7 +34,7 @@ def main():
     base_out.mkdir(parents=True, exist_ok=True)
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = base_out / f"run_{stamp}"
+    run_dir = base_out / f"run_TCN_LSTM_{stamp}"
     run_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Starting training. Artifacts will be saved to: {run_dir}")
@@ -71,7 +71,7 @@ def main():
                 plt.plot(history.get('val_loss', []), label='Validation Loss')
                 plt.xlabel('Epochs')
                 plt.ylabel('Loss (MSE)')
-                plt.title('Training and Validation MSE Loss')
+                plt.title('Training and Validation MSE Loss - TCN-LSTM')
                 plt.legend()
                 plt.grid(True)
                 plt.tight_layout()
@@ -92,7 +92,7 @@ def main():
                 plt.plot(history.get(f'val_{mae_key}', []), label='Validation MAE')
                 plt.xlabel('Epochs')
                 plt.ylabel('MAE')
-                plt.title('Training and Validation MAE')
+                plt.title('Training and Validation MAE - TCN-LSTM')
                 plt.legend()
                 plt.grid(True)
                 plt.tight_layout()

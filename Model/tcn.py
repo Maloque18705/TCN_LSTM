@@ -42,7 +42,7 @@ class ResidualBlock(tf.keras.layers.Layer):
 
 
 class TCN_Model(tf.keras.Model):
-    def __init__(self, num_blocks=4, filters=64, kernel_size=3, target_len=5):
+    def __init__(self, num_blocks=6, filters=64, kernel_size=3, target_len=5):
         super().__init__()
 
         self.tcn_blocks = tf.keras.Sequential()
