@@ -105,7 +105,7 @@ def main():
 
     # 6) Save artifacts
     try:
-        model.save(str(run_dir / "model_saved"), save_format="tf")
+        model.save(str(run_dir / "model_saved.keras"), save_format="")
     except Exception as e:
         print(f"Warning: failed to save model: {e}")
 
@@ -173,7 +173,7 @@ def main():
                 plt.plot(hist.get('val_loss', []), label='Validation Loss')
                 plt.xlabel('Epochs')
                 plt.ylabel('Loss (MSE)')
-                plt.title('Training and Validation MSE Loss - LSTM')
+                plt.title(f"Training and Validation MSE Loss - LSTM - Missing {config.OUTPUT_STEPS}% Data")
                 plt.legend()
                 plt.grid(True)
                 plt.tight_layout()

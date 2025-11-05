@@ -9,7 +9,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 from Data.dataloader import DataLoader, DataProcess
 from Data import config
-from Model.model import TCN_Model
+from Model.tcn_lstm import TCN_Model
 from tensorflow.keras.callbacks import EarlyStopping, CSVLogger
 
 
@@ -68,7 +68,7 @@ def train(epochs: int = 100, batch_size: int = 64, save_dir: str = "."):
 	X_test_s = X_test_s.reshape((X_test_s.shape[0], X_test_s.shape[1], n_features))
 
 	# 6) Build model
-	model = TCN_Model(num_blocks=4, filters=64, kernel_size=3, target_len=config.OUTPUT_STEPS)
+	model = TCN_Model(num_blocks=6, filters=64, kernel_size=3, target_len=config.OUTPUT_STEPS)
 	model.build(input_shape=(None, config.INPUT_STEPS, n_features))
 	model.summary()
 
