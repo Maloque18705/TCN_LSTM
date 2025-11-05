@@ -1,17 +1,15 @@
 import tensorflow as tf
 from tensorflow.keras import layers, Model
 
-# Residual Block cho TCN
-class ResidualBlock(tf.keras.layers.Layer):
+# --- Residual Block ---
+class ResidualBlock(layers.Layer):
     def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2):
         super().__init__()
-        self.conv1 = layers.Conv1D(filters, kernel_size, padding='causal',
-                                   dilation_rate=dilation_rate)
+        self.conv1 = layers.Conv1D(filters, kernel_size, padding='causal', dilation_rate=dilation_rate)
         self.relu1 = layers.Activation('relu')
         self.dropout1 = layers.Dropout(dropout_rate)
 
-        self.conv2 = layers.Conv1D(filters, kernel_size, padding='causal',
-                                   dilation_rate=dilation_rate)
+        self.conv2 = layers.Conv1D(filters, kernel_size, padding='causal', dilation_rate=dilation_rate)
         self.relu2 = layers.Activation('relu')
         self.dropout2 = layers.Dropout(dropout_rate)
 
@@ -26,41 +24,37 @@ class ResidualBlock(tf.keras.layers.Layer):
         super().build(input_shape)
 
     def call(self, x, training=False):
-        residual = x
-        if self.downsample is not None:
-            residual = self.downsample(x)
-
+        residual = x if self.downsample is None else self.downsample(x)
         x = self.conv1(x)
         x = self.relu1(x)
         x = self.dropout1(x, training=training)
-
         x = self.conv2(x)
         x = self.relu2(x)
         x = self.dropout2(x, training=training)
-
         return self.final_relu(x + residual)
 
-# TCN Model
-class TCN_Model(tf.keras.Model):
-    def __init__(self, num_blocks=4, filters=64, kernel_size=3, target_len=5):
+# --- TCN + LSTM Model ---
+class TCN_LSTM(Model):
+    def __init__(self, num_blocks=6, filters=128, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.15):
         super().__init__()
 
-        self.tcn_blocks = tf.keras.Sequential()
-        for i in range(num_blocks):
-            dilation_rate = 2 ** i
-            self.tcn_blocks.add(ResidualBlock(filters, kernel_size, dilation_rate))
+        # TCN stack
+        self.tcn_blocks = tf.keras.Sequential([
+            ResidualBlock(filters, kernel_size, 2 ** i, dropout_rate)
+            for i in range(num_blocks)
+        ])
 
-        # Lấy bước thời gian cuối cùng
-        self.last_time_step = layers.Lambda(lambda x: x[:, -1, :])  # shape (batch, features)
+        # LSTM layer
+        self.lstm = layers.LSTM(lstm_units, return_sequences=False)
 
-        # Fully connected layers
+        # Fully connected
         self.fc1 = layers.Dense(128, activation='relu')
         self.fc2 = layers.Dense(64, activation='relu')
-        self.out = layers.Dense(target_len)  # output sequence
+        self.out = layers.Dense(target_len)
 
     def call(self, x, training=False):
-        x = self.tcn_blocks(x, training=training)  # (batch, time, filters)
-        x = self.last_time_step(x)                 # (batch, filters)
+        x = self.tcn_blocks(x, training=training)
+        x = self.lstm(x)
         x = self.fc1(x)
         x = self.fc2(x)
-        return self.out(x)                         # (batch, target_len)
+        return self.out(x)

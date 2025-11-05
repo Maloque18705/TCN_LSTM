@@ -90,7 +90,7 @@ def main():
     X_test_s = X_test_s.reshape((X_test_s.shape[0], X_test_s.shape[1], n_features))
 
     # 4️⃣ Build model
-    model = TCN_LSTM(num_blocks=4, filters=64, kernel_size=3, target_len=config.OUTPUT_STEPS)
+    model = TCN_LSTM(num_blocks=6, filters=128, kernel_size=3, target_len=config.OUTPUT_STEPS)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss='mse', metrics=['mae'])
     model.build(input_shape=(None, X_train_s.shape[1], X_train_s.shape[2]))
     model.summary()
