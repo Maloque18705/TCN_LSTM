@@ -191,7 +191,7 @@ def main():
                 plt.plot(hist.get(f'val_{mae_key}', []), label='Validation MAE')
                 plt.xlabel('Epochs')
                 plt.ylabel('MAE')
-                plt.title('Training and Validation MAE - LSTM')
+                plt.title(f"Training and Validation MAE - LSTM - Missing {config.OUTPUT_STEPS}% Data")
                 plt.legend()
                 plt.grid(True)
                 plt.tight_layout()

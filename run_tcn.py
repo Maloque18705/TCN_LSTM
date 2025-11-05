@@ -12,7 +12,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from Train.train import train
+# from Train.train import train
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -210,7 +210,7 @@ def main():
                 plt.plot(hist.get(f'val_{mae_key}', []), label='Validation MAE')
                 plt.xlabel('Epochs')
                 plt.ylabel('MAE')
-                plt.title('Training and Validation MAE - TCN')
+                plt.title(f"Training and Validation MAE - TCN - Missing {config.OUTPUT_STEPS}% Data")
                 plt.legend()
                 plt.grid(True)
                 plt.tight_layout()

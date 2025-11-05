@@ -2,7 +2,7 @@
 
 # Sequence lengths
 INPUT_STEPS = 100
-OUTPUT_STEPS = 5  # missing data percentage
+OUTPUT_STEPS = int(input("Missing Data Percentage: "))  # missing data percentage
 
 # Data folder (relative to project root)
 FOLDER_PATH = r"./Data/Z24"
