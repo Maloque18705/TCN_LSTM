@@ -74,7 +74,7 @@ def main():
 
     # 3) Scale and reshape
     (X_train_s, y_train_s, X_val_s, y_val_s, X_test_s, y_test_s), min_val, max_val = dp.minmax_scaler(
-        X_train, y_train, X_val, y_val, X_test, y_test, data_reference=sensor_series, save_path=str(run_dir / "scaler_values.npy")
+        X_train, y_train, X_val, y_val, X_test, y_test, save_path=str(run_dir / "scaler_values.npy")
     )
 
     n_features = 1
