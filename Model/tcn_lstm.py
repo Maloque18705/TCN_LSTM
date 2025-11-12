@@ -1,8 +1,23 @@
 import tensorflow as tf
 from tensorflow.keras import layers, Model
 
+# Version-compatible decorator
+try:
+    # TensorFlow 2.13+
+    register_keras_serializable = tf.keras.saving.register_keras_serializable
+except AttributeError:
+    try:
+        # TensorFlow 2.0-2.12
+        register_keras_serializable = tf.keras.utils.register_keras_serializable
+    except AttributeError:
+        # Fallback: no-op decorator for older versions
+        def register_keras_serializable(package=None, name=None):
+            def decorator(cls):
+                return cls
+            return decorator
+
 # --- Residual Block ---
-@tf.keras.saving.register_keras_serializable()
+@register_keras_serializable(package="Model.tcn_lstm")
 class ResidualBlock(layers.Layer):
     def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2):
         super().__init__()
@@ -35,7 +50,7 @@ class ResidualBlock(layers.Layer):
         return self.final_relu(x + residual)
 
 # --- TCN + LSTM Model ---
-@tf.keras.saving.register_keras_serializable()
+@register_keras_serializable(package="Model.tcn_lstm")
 class TCN_LSTM(Model):
     def __init__(self, num_blocks=6 , filters=128, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.25):
         super().__init__()
