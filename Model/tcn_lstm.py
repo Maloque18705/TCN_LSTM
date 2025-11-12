@@ -1,23 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers, Model
 
-# Version-compatible decorator
-try:
-    # TensorFlow 2.13+
-    register_keras_serializable = tf.keras.saving.register_keras_serializable
-except AttributeError:
-    try:
-        # TensorFlow 2.0-2.12
-        register_keras_serializable = tf.keras.utils.register_keras_serializable
-    except AttributeError:
-        # Fallback: no-op decorator for older versions
-        def register_keras_serializable(package=None, name=None):
-            def decorator(cls):
-                return cls
-            return decorator
-
 # --- Residual Block ---
-@register_keras_serializable(package="Model.tcn_lstm")
 class ResidualBlock(layers.Layer):
     def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2):
         super().__init__()
@@ -50,18 +34,9 @@ class ResidualBlock(layers.Layer):
         return self.final_relu(x + residual)
 
 # --- TCN + LSTM Model ---
-@register_keras_serializable(package="Model.tcn_lstm")
 class TCN_LSTM(Model):
-    def __init__(self, num_blocks=4 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.25, **kwargs):
-        super().__init__(**kwargs)
-
-        # Store parameters for get_config
-        self.num_blocks = num_blocks
-        self.filters = filters
-        self.kernel_size = kernel_size
-        self.lstm_units = lstm_units
-        self.target_len = target_len
-        self.dropout_rate = dropout_rate
+    def __init__(self, num_blocks=4 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.15):
+        super().__init__()
 
         # TCN stack
         self.tcn_blocks = tf.keras.Sequential([
@@ -76,6 +51,16 @@ class TCN_LSTM(Model):
         self.fc1 = layers.Dense(128, activation='relu')
         self.fc2 = layers.Dense(64, activation='relu')
         self.out = layers.Dense(target_len)
+    
+    # def build(self, input_shape):
+    #     # Gọi qua TCN block để đảm bảo các lớp con được build
+    #     x = tf.zeros(input_shape)
+    #     x = self.tcn_blocks(x)
+    #     x = self.lstm(x)
+    #     x = self.fc1(x)
+    #     x = self.fc2(x)
+    #     self.out(x)
+    #     super().build(input_shape)
 
     def call(self, x, training=False):
         x = self.tcn_blocks(x, training=training)
@@ -83,23 +68,3 @@ class TCN_LSTM(Model):
         x = self.fc1(x)
         x = self.fc2(x)
         return self.out(x)
-
-    def get_config(self):
-        config = super().get_config()
-        config.update({
-            'num_blocks': self.num_blocks,
-            'filters': self.filters,
-            'kernel_size': self.kernel_size,
-            'lstm_units': self.lstm_units,
-            'target_len': self.target_len,
-            'dropout_rate': self.dropout_rate,
-        })
-        return config
-
-    @classmethod
-    def from_config(cls, config):
-        # Remove extra keys that are not constructor arguments
-        config = {k: v for k, v in config.items()
-                  if k in ['num_blocks', 'filters', 'kernel_size', 'lstm_units', 'target_len', 'dropout_rate']}
-        return cls(**config)
-
