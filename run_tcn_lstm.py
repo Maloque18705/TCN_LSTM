@@ -80,7 +80,6 @@ def main():
     # 3️⃣ Scale and reshape
     (X_train_s, y_train_s, X_val_s, y_val_s, X_test_s, y_test_s), min_val, max_val = dp.minmax_scaler(
         X_train, y_train, X_val, y_val, X_test, y_test,
-        data_reference=sensor_series,
         save_path=str(run_dir / "scaler_values.npy")
     )
 
@@ -128,9 +127,18 @@ def main():
 
     # 7️⃣ Evaluate metrics
     try:
+        print(f"🔍 Debug: X_train_s shape: {X_train_s.shape}")
+        print(f"🔍 Debug: X_val_s shape: {X_val_s.shape}")
+        print(f"🔍 Debug: X_test_s shape: {X_test_s.shape}")
+
         y_train_pred_scaled = model.predict(X_train_s)
+        print(f"✅ Train prediction done: {y_train_pred_scaled.shape}")
+
         y_val_pred_scaled = model.predict(X_val_s)
+        print(f"✅ Val prediction done: {y_val_pred_scaled.shape}")
+
         y_test_pred_scaled = model.predict(X_test_s)
+        print(f"✅ Test prediction done: {y_test_pred_scaled.shape}")
 
         denom = (max_val - min_val) if (max_val - min_val) != 0 else 1.0
         y_train_real = y_train_s.squeeze() * denom + min_val
@@ -159,8 +167,10 @@ def main():
         }
 
         pd.DataFrame(metrics).to_csv(run_dir / "metrics.csv", index=False)
+        print(f"✅ Metrics saved to: {run_dir / 'metrics.csv'}")
     except Exception as e:
         print(f"⚠️ Warning: evaluation failed: {e}")
+        traceback.print_exc()
 
     # 8️⃣ Plot training history
     hist = history.history if hasattr(history, 'history') else (history if isinstance(history, dict) else None)
