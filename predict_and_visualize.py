@@ -15,6 +15,7 @@ import tensorflow as tf
 
 from Data.dataloader import DataLoader, DataProcess
 from Data import config
+from Model.tcn_lstm import TCN_LSTM, ResidualBlock  # Import custom classes for loading
 
 
 def find_latest_run(base_dir: str = "./outputs/tcn_lstm/5p") -> Path:

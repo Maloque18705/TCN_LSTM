@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 
 # --- Residual Block ---
+@tf.keras.saving.register_keras_serializable()
 class ResidualBlock(layers.Layer):
     def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2):
         super().__init__()
@@ -34,6 +35,7 @@ class ResidualBlock(layers.Layer):
         return self.final_relu(x + residual)
 
 # --- TCN + LSTM Model ---
+@tf.keras.saving.register_keras_serializable()
 class TCN_LSTM(Model):
     def __init__(self, num_blocks=6 , filters=128, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.25):
         super().__init__()
@@ -58,3 +60,4 @@ class TCN_LSTM(Model):
         x = self.fc1(x)
         x = self.fc2(x)
         return self.out(x)
+

@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 
 
+@tf.keras.saving.register_keras_serializable()
 class ResidualBlock(tf.keras.layers.Layer):
     def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2):
         super().__init__()
@@ -41,6 +42,7 @@ class ResidualBlock(tf.keras.layers.Layer):
         return self.final_relu(x + residual)
 
 
+@tf.keras.saving.register_keras_serializable()
 class TCN_Model(tf.keras.Model):
     def __init__(self, num_blocks=6, filters=64, kernel_size=3, target_len=5):
         super().__init__()
