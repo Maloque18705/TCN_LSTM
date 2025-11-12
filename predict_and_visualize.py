@@ -61,7 +61,18 @@ def main():
         sys.exit(1)
 
     print(f"📦 Loading model from: {model_path}")
-    model = tf.keras.models.load_model(model_path)
+    try:
+        # Try loading normally (works if model was trained with decorator)
+        model = tf.keras.models.load_model(model_path)
+    except TypeError as e:
+        # Fallback: Load with custom_objects (for old models without decorator)
+        print(f"⚠️  Standard loading failed, trying with custom_objects...")
+        custom_objects = {
+            'TCN_LSTM': TCN_LSTM,
+            'ResidualBlock': ResidualBlock
+        }
+        model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+        print(f"✅ Loaded with custom_objects (model trained before decorator was added)")
 
     # 3️⃣ Load scaler values
     scaler_path = run_dir / "scaler_values.npy"

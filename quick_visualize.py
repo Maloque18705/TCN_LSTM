@@ -30,7 +30,17 @@ def main():
     # Load model
     model_path = run_dir / "model_saved.keras"
     print(f"📦 Loading model: {model_path}")
-    model = tf.keras.models.load_model(model_path)
+    try:
+        model = tf.keras.models.load_model(model_path)
+    except TypeError as e:
+        # Fallback for old models
+        print(f"⚠️  Standard loading failed, trying with custom_objects...")
+        custom_objects = {
+            'TCN_LSTM': TCN_LSTM,
+            'ResidualBlock': ResidualBlock
+        }
+        model = tf.keras.models.load_model(model_path, custom_objects=custom_objects)
+        print(f"✅ Loaded with custom_objects")
 
     # Load scaler
     scaler = np.load(run_dir / "scaler_values.npy")
