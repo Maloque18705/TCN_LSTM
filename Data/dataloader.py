@@ -228,17 +228,13 @@ class DataProcess:
 
         Returns: ((X_train_s, y_train_s, X_val_s, y_val_s, X_test_s, y_test_s), min_val, max_val)
         """
-        if data_reference is not None:
-            min_val = data_reference.min()
-            max_val = data_reference.max()
-        else:
-            # fallback: compute from combined arrays
-            all_values = np.concatenate([X_train.ravel(), y_train.ravel(), X_val.ravel(), y_val.ravel(), X_test.ravel(), y_test.ravel()])
-            min_val = all_values.min()
-            max_val = all_values.max()
+        train_all = np.concatenate([X_train.ravel(), y_train.ravel()])
+        min_val = train_all.min()
+        max_val = train_all.max()
 
         denom = (max_val - min_val) if (max_val - min_val) != 0 else 1.0
 
+        # Áp dụng cùng một transformation cho tất cả các sets
         X_train_s = (X_train - min_val) / denom
         y_train_s = (y_train - min_val) / denom
         X_val_s = (X_val - min_val) / denom

@@ -5,7 +5,7 @@ INPUT_STEPS = 100
 OUTPUT_STEPS = int(input("Missing Data Percentage: "))  # missing data percentage
 
 # Data folder (relative to project root)
-FOLDER_PATH = r"./Data/RachMieu1"
+FOLDER_PATH = r"./Data/Z24"
 
 # Sensor selection (1-based in notebook)
 SELECTED_SENSOR = 1  # 1..27

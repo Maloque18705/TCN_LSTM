@@ -85,19 +85,19 @@ def main():
         sys.exit(1)
 
     # 3️⃣ Scale and reshape
+
+
     (X_train_s, y_train_s, X_val_s, y_val_s, X_test_s, y_test_s), min_val, max_val = dp.minmax_scaler(
         X_train, y_train, X_val, y_val, X_test, y_test,
-        data_reference=sensor_series,
         save_path=str(run_dir / "scaler_values.npy")
     )
-
     n_features = 1
     X_train_s = X_train_s.reshape((X_train_s.shape[0], X_train_s.shape[1], n_features))
     X_val_s = X_val_s.reshape((X_val_s.shape[0], X_val_s.shape[1], n_features))
     # X_test_s = X_test_s.reshape((X_test_s.shape[0], X_test_s.shape[1], n_features))
 
     # 4️⃣ Build model
-    model = TCN_LSTM(num_blocks=6, filters=128, kernel_size=3, target_len=config.OUTPUT_STEPS)
+    model = TCN_LSTM(num_blocks=4, filters=64, kernel_size=3, target_len=config.OUTPUT_STEPS)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss='mse', metrics=['mae'])
     model.build(input_shape=(None, X_train_s.shape[1], X_train_s.shape[2]))
     model.summary()
