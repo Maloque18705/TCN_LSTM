@@ -3,8 +3,16 @@ from tensorflow.keras import layers, Model
 
 # --- Residual Block ---
 class ResidualBlock(layers.Layer):
-    def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2):
-        super().__init__()
+    def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2, **kwargs):
+        # 1. Thêm **kwargs và truyền vào super()
+        super().__init__(**kwargs)
+        
+        # 2. Lưu các tham số để dùng trong get_config
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.dilation_rate = dilation_rate
+        self.dropout_rate = dropout_rate
+
         self.conv1 = layers.Conv1D(filters, kernel_size, padding='causal', dilation_rate=dilation_rate)
         self.relu1 = layers.Activation('relu')
         self.dropout1 = layers.Dropout(dropout_rate)
@@ -15,7 +23,6 @@ class ResidualBlock(layers.Layer):
 
         self.downsample = None
         self.final_relu = layers.Activation('relu')
-        self.filters = filters
 
     def build(self, input_shape):
         in_channels = input_shape[-1]
@@ -33,10 +40,30 @@ class ResidualBlock(layers.Layer):
         x = self.dropout2(x, training=training)
         return self.final_relu(x + residual)
 
+    # 3. Thêm get_config
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "filters": self.filters,
+            "kernel_size": self.kernel_size,
+            "dilation_rate": self.dilation_rate,
+            "dropout_rate": self.dropout_rate,
+        })
+        return config
+
 # --- TCN + LSTM Model ---
 class TCN_LSTM(Model):
-    def __init__(self, num_blocks=4 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.15):
-        super().__init__()
+    def __init__(self, num_blocks=4 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.15, **kwargs):
+        # 1. Thêm **kwargs và truyền vào super()
+        super().__init__(**kwargs)
+        
+        # 2. Lưu các tham số để dùng trong get_config
+        self.num_blocks = num_blocks
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.lstm_units = lstm_units
+        self.target_len = target_len
+        self.dropout_rate = dropout_rate
 
         # TCN stack
         self.tcn_blocks = tf.keras.Sequential([
@@ -52,19 +79,22 @@ class TCN_LSTM(Model):
         self.fc2 = layers.Dense(64, activation='relu')
         self.out = layers.Dense(target_len)
     
-    # def build(self, input_shape):
-    #     # Gọi qua TCN block để đảm bảo các lớp con được build
-    #     x = tf.zeros(input_shape)
-    #     x = self.tcn_blocks(x)
-    #     x = self.lstm(x)
-    #     x = self.fc1(x)
-    #     x = self.fc2(x)
-    #     self.out(x)
-    #     super().build(input_shape)
-
     def call(self, x, training=False):
         x = self.tcn_blocks(x, training=training)
         x = self.lstm(x)
         x = self.fc1(x)
         x = self.fc2(x)
         return self.out(x)
+
+    # 3. Thêm get_config
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "num_blocks": self.num_blocks,
+            "filters": self.filters,
+            "kernel_size": self.kernel_size,
+            "lstm_units": self.lstm_units,
+            "target_len": self.target_len,
+            "dropout_rate": self.dropout_rate,
+        })
+        return config

@@ -2,8 +2,8 @@
 Simple prediction visualization script based on trained model.
 
 Usage:
-    python visualize_predictions.py outputs/tcn_lstm/5p/run_TCN_LSTM_20251112_114530
-    python visualize_predictions.py outputs/tcn_lstm/5p/run_TCN_LSTM_20251112_114530 --num-samples 20
+    python visualize_predictions_tcn_lstm.py outputs/tcn_lstm/5p/run_TCN_LSTM_...
+    python visualize_predictions_tcn_lstm.py outputs/tcn_lstm/5p/run_TCN_LSTM_... --num-samples 20
 """
 
 import argparse
@@ -19,7 +19,7 @@ from Model.tcn_lstm import TCN_LSTM, ResidualBlock
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Visualize predictions from trained model")
+    p = argparse.ArgumentParser(description="Visualize predictions from trained TCN-LSTM model")
     p.add_argument("run_dir", type=str, help="Path to run directory (e.g., outputs/tcn_lstm/5p/run_XXX)")
     p.add_argument("--num-samples", type=int, default=10, help="Number of samples to visualize")
     p.add_argument("--save", action="store_true", help="Save plots instead of displaying")
@@ -43,18 +43,19 @@ def main():
         sys.exit(1)
 
     print(f"📦 Loading model from: {model_path}")
+    
+    # Cần thiết để Keras biết 'TCN_LSTM' và 'ResidualBlock' là gì khi tải
+    custom_objects = {'TCN_LSTM': TCN_LSTM, 'ResidualBlock': ResidualBlock}
+    
     try:
-        model = tf.keras.models.load_model(str(model_path))
-        print(f"✅ Model loaded successfully!")
+        # Thử tải với custom_objects (cách an toàn nhất)
+        model = tf.keras.models.load_model(str(model_path), custom_objects=custom_objects)
+        print(f"✅ Model loaded successfully with custom_objects!")
     except Exception as e:
-        print(f"⚠️  Standard loading failed, trying with custom_objects...")
-        try:
-            custom_objects = {'TCN_LSTM': TCN_LSTM, 'ResidualBlock': ResidualBlock}
-            model = tf.keras.models.load_model(str(model_path), custom_objects=custom_objects)
-            print(f"✅ Model loaded with custom_objects!")
-        except Exception as e2:
-            print(f"❌ Failed to load model: {e2}")
-            sys.exit(1)
+        print(f"❌ Failed to load model: {e}")
+        print("Mẹo: Đảm bảo file 'Model/tcn_lstm.py' đã được sửa (với **kwargs và get_config) và nằm trong PYTHONPATH.")
+        sys.exit(1)
+
 
     # 2️⃣ Load scaler values
     scaler_path = run_dir / "scaler_values.npy"
@@ -76,7 +77,7 @@ def main():
         sys.exit(1)
 
     dp = DataProcess()
-    Data1 = dp.extract_from_sensor(final_array, case_index=config.CASE_INDEX)
+    Data1 = dp.extract_from_sensor(final_array, case_index=0)
     print(f"✅ Sensor data extracted: {Data1.shape}")
 
     # 4️⃣ Sample random segments from Data1
@@ -119,8 +120,10 @@ def main():
     print(f"✅ Predictions converted to original scale")
 
     # 9️⃣ Visualize
-    n_steps = config.INPUT_STEPS
-    time_future = np.arange(n_steps, n_steps + config.OUTPUT_STEPS)
+    # n_steps = config.INPUT_STEPS # (Không cần dùng)
+    
+    # 1. THAY ĐỔI: Tạo trục x mới (0, 1, 2, 3, 4)
+    time_future_adj = np.arange(config.OUTPUT_STEPS)
 
     if args.save:
         plot_dir = run_dir / "predictions"
@@ -128,35 +131,44 @@ def main():
         print(f"💾 Saving plots to: {plot_dir}")
 
     for i in range(num_samples):
-        plt.figure(figsize=(16, 4))
+        # 2. THAY ĐỔI: Thu nhỏ figure
+        plt.figure(figsize=(10, 4))
 
-        # Plot past data (input)
-        time_input = np.arange(n_steps)
-        plt.plot(time_input, X[i], 's-', label="Past Data (Input)", color='green',
-                markersize=3, linewidth=1.5, alpha=0.7)
+        # 3. THAY ĐỔI: Xóa bỏ phần vẽ "Past Data (Input)"
+        # Plot past data (input) -> ĐÃ BỊ XÓA
+        # time_input = np.arange(n_steps)
+        # plt.plot(time_input, X[i], 's-', ...)
 
+        # 4. THAY ĐỔI: Dùng trục x mới (time_future_adj)
         # Plot actual future (ground truth)
-        plt.plot(time_future, y_true[i], 'o-', label="Actual Future (Ground Truth)",
-                color='blue', markersize=5, linewidth=2)
+        plt.plot(time_future_adj, y_true[i], 'o-', label="Actual Future (Ground Truth)",
+                 color='blue', markersize=5, linewidth=2)
 
+        # 5. THAY ĐỔI: Dùng trục x mới (time_future_adj)
         # Plot predicted future
-        plt.plot(time_future, y_pred_real[i], 'D--', label="Predicted Future",
-                color='red', markersize=5, linewidth=2)
+        plt.plot(time_future_adj, y_pred_real[i], 'D--', label="Predicted Future",
+                 color='red', markersize=5, linewidth=2)
 
-        # Connect last point of past to future
-        plt.plot([n_steps - 1, n_steps], [X[i, -1], y_true[i, 0]],
-                'b-', linewidth=1, alpha=0.5)
-        plt.plot([n_steps - 1, n_steps], [X[i, -1], y_pred_real[i, 0]],
-                'r--', linewidth=1, alpha=0.5)
+        # 6. THAY ĐỔI: Xóa bỏ các đường nối
+        # Connect last point of past to future -> ĐÃ BỊ XÓA
+        # plt.plot([n_steps - 1, n_steps], ...)
+        # plt.plot([n_steps - 1, n_steps], ...)
 
         # Formatting
         plt.axhline(0, color='black', linestyle='--', linewidth=0.8, alpha=0.5)
-        plt.axvline(n_steps, color='gray', linestyle=':', linewidth=1.5, alpha=0.7)
+        # 7. THAY ĐỔI: Xóa bỏ đường phân cách (axvline)
+        # plt.axvline(n_steps, ...) -> ĐÃ BỊ XÓA
 
-        plt.xlabel("Time Step", fontsize=12)
+        # 8. THAY ĐỔI: Cập nhật nhãn X và Tiêu đề
+        plt.xlabel("Future Time Step", fontsize=12)
         plt.ylabel("Value", fontsize=12)
-        plt.title(f"Time Series Prediction - Sample {i+1}/{num_samples} (Case {config.CASE_INDEX})", fontsize=14)
-        plt.legend(loc='best', fontsize=10)
+        
+        # 9. THAY ĐỔI: Cập nhật tiêu đề cho TCN-LSTM
+        plt.title(f"Future Prediction - Sample {i+1}/{num_samples} TCN-LSTM - Missing {config.OUTPUT_STEPS}%", fontsize=14)
+        
+        # 10. THAY ĐỔI: Di chuyển chú giải (legend)
+        plt.legend(loc='upper right', fontsize=10) # <-- THAY ĐỔI TẠI ĐÂY
+        
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
 

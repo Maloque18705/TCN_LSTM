@@ -9,8 +9,12 @@ class LSTM_Model(tf.keras.Model):
     a vector of length `target_len` (the predicted future steps).
     """
 
-    def __init__(self, num_layers: int = 2, units: int = 128, dropout: float = 0.2, target_len: int = 5):
-        super().__init__()
+    # 1. Thêm **kwargs
+    def __init__(self, num_layers: int = 2, units: int = 128, dropout: float = 0.2, target_len: int = 5, **kwargs):
+        # 2. Truyền **kwargs vào super()
+        super().__init__(**kwargs)
+        
+        # 3. Lưu các tham số cho get_config
         self.num_layers = num_layers
         self.units = units
         self.dropout = dropout
@@ -35,6 +39,17 @@ class LSTM_Model(tf.keras.Model):
         x = self.fc1(x)
         x = self.fc2(x)
         return self.out(x)
+
+    # 4. Thêm get_config
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "num_layers": self.num_layers,
+            "units": self.units,
+            "dropout": self.dropout,
+            "target_len": self.target_len,
+        })
+        return config
 
 
 def build_lstm_model(input_shape, num_layers=2, units=128, dropout=0.2, target_len=5):
