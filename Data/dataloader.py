@@ -144,7 +144,7 @@ class DataProcess:
         return sensor_data[step_start:step_finish]
 
     def create_sample(self, data: np.ndarray, input_steps: int, output_steps: int,
-                      test_size: float = 0.3, val_ratio_within_temp: float = 0.5, random_state: int = 42, # Thử test_size=0.6
+                      test_size: float = 0.3, val_ratio_within_temp: float = 0.5, random_state: int = 42,
                       limit_samples: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Create sliding-window samples (X,y) and split into train/val/test.
 
@@ -155,8 +155,8 @@ class DataProcess:
             data: 1D array of time series data
             input_steps: number of input timesteps per sample
             output_steps: number of output timesteps to predict
-            test_size: fraction of data to use for test+validation (default 0.3)
-            val_ratio_within_temp: how to split test_size between val/test (default 0.5)
+            test_size: fraction of data to use for test+validation (default 0.3 for 70/15/15 split)
+            val_ratio_within_temp: how to split test_size between val/test (default 0.5 for equal split)
             random_state: random seed for reproducibility
             limit_samples: if provided, limit total samples (split proportionally)
 
@@ -205,11 +205,11 @@ class DataProcess:
         test_data = data[train_end + val_size:]
         
         # 2. Create sequences for each set independently
-        # Calculate samples per set if limit is specified
+        # Calculate samples per set if limit is specified (maintain 70/15/15 ratio)
         if limit_samples is not None:
-            train_samples = int(limit_samples * 0.7)
-            val_samples = int(limit_samples * 0.15)
-            test_samples = limit_samples - train_samples - val_samples  # remaining to reach limit_samples exactly
+            train_samples = int(limit_samples * 0.7)  # 70%
+            val_samples = int(limit_samples * 0.15)   # 15%
+            test_samples = limit_samples - train_samples - val_samples  # remaining ~15%
         else:
             train_samples = val_samples = test_samples = None
         
