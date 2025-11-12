@@ -144,7 +144,7 @@ class DataProcess:
         return sensor_data[step_start:step_finish]
 
     def create_sample(self, data: np.ndarray, input_steps: int, output_steps: int,
-                      test_size: float = 0.6, val_ratio_within_temp: float = 0.5, random_state: int = 42, # Thử test_size=0.6
+                      test_size: float = 0.3, val_ratio_within_temp: float = 0.5, random_state: int = 42, # Thử test_size=0.6
                       limit_samples: Optional[int] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Create sliding-window samples (X,y) and split into train/val/test.
 
@@ -207,8 +207,8 @@ class DataProcess:
         # 2. Create sequences for each set independently
         # Calculate samples per set if limit is specified
         if limit_samples is not None:
-            train_samples = int(limit_samples * 0.4)
-            val_samples = int(limit_samples * 0.4)
+            train_samples = int(limit_samples * 0.7)
+            val_samples = int(limit_samples * 0.15)
             test_samples = limit_samples - train_samples - val_samples  # remaining to reach limit_samples exactly
         else:
             train_samples = val_samples = test_samples = None
