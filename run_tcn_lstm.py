@@ -88,6 +88,10 @@ def main():
     X_val_s = X_val_s.reshape((X_val_s.shape[0], X_val_s.shape[1], n_features))
     X_test_s = X_test_s.reshape((X_test_s.shape[0], X_test_s.shape[1], n_features))
 
+    # Save test data for later visualization
+    np.savez(run_dir / "test_data.npz", X_test_scaled=X_test_s, y_test_scaled=y_test_s)
+    print(f"💾 Saved test data for visualization: {run_dir / 'test_data.npz'}")
+
     # 4️⃣ Build model
     model = TCN_LSTM(num_blocks=4, filters=64, kernel_size=3, target_len=config.OUTPUT_STEPS)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss='mse', metrics=['mae'])
