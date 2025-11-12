@@ -221,23 +221,24 @@ class DataProcess:
         return X_train, X_val, X_test, y_train, y_val, y_test
 
     def minmax_scaler(self, X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_val: np.ndarray,
-                      X_test: np.ndarray, y_test: np.ndarray, data_reference: Optional[np.ndarray] = None,
+                      X_test: np.ndarray, y_test: np.ndarray,
                       save_path: str = "scaler_values.npy") -> Tuple[Tuple[np.ndarray, ...], float, float]:
-        """Apply min-max scaling using min/max from data_reference (or combined data) and save the scaler.
+        """Apply min-max scaling using min/max from TRAINING DATA ONLY to prevent data leakage.
+
+        Important: We compute min/max statistics ONLY from training data (X_train, y_train)
+        and apply the same transformation to validation and test sets. This ensures no
+        information from val/test sets leaks into the training process.
 
         Returns: ((X_train_s, y_train_s, X_val_s, y_val_s, X_test_s, y_test_s), min_val, max_val)
         """
-        if data_reference is not None:
-            min_val = data_reference.min()
-            max_val = data_reference.max()
-        else:
-            # fallback: compute from combined arrays
-            all_values = np.concatenate([X_train.ravel(), y_train.ravel(), X_val.ravel(), y_val.ravel(), X_test.ravel(), y_test.ravel()])
-            min_val = all_values.min()
-            max_val = all_values.max()
+        # Compute min/max ONLY from training data to prevent data leakage
+        train_all = np.concatenate([X_train.ravel(), y_train.ravel()])
+        min_val = train_all.min()
+        max_val = train_all.max()
 
         denom = (max_val - min_val) if (max_val - min_val) != 0 else 1.0
 
+        # Apply the same transformation to all sets
         X_train_s = (X_train - min_val) / denom
         y_train_s = (y_train - min_val) / denom
         X_val_s = (X_val - min_val) / denom
