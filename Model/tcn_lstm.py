@@ -51,6 +51,16 @@ class TCN_LSTM(Model):
         self.fc1 = layers.Dense(128, activation='relu')
         self.fc2 = layers.Dense(64, activation='relu')
         self.out = layers.Dense(target_len)
+    
+    # def build(self, input_shape):
+    #     # Gọi qua TCN block để đảm bảo các lớp con được build
+    #     x = tf.zeros(input_shape)
+    #     x = self.tcn_blocks(x)
+    #     x = self.lstm(x)
+    #     x = self.fc1(x)
+    #     x = self.fc2(x)
+    #     self.out(x)
+    #     super().build(input_shape)
 
     def call(self, x, training=False):
         x = self.tcn_blocks(x, training=training)

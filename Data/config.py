@@ -5,7 +5,7 @@ INPUT_STEPS = 100
 OUTPUT_STEPS = int(input("Missing Data Percentage: "))  # missing data percentage
 
 # Data folder (relative to project root)
-FOLDER_PATH = r"./Data/Z24"
+FOLDER_PATH = r"./Data/RachMieu1"
 
 # Sensor selection (1-based in notebook)
 SELECTED_SENSOR = 1  # 1..27
@@ -17,6 +17,9 @@ DESIGN_SAMPLES = 10000
 STEP_START = 20000
 # Compute finish like notebook: STEP_START + DESIGN_SAMPLES + (INPUT_STEPS + OUTPUT_STEPS) - 1
 STEP_FINISH = STEP_START + DESIGN_SAMPLES + (INPUT_STEPS + OUTPUT_STEPS) - 1
+
+# CASE SELECTION
+CASE_INDEX = int(input("Case Index (1-17): "))  # 1..17
 
 __all__ = [
 	"INPUT_STEPS",

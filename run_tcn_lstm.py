@@ -16,7 +16,7 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 import pickle
-
+import io
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -28,11 +28,18 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from Model.tcn_lstm import TCN_LSTM
 from Data.dataloader import DataLoader, DataProcess
 from Data import config
+from tensorflow.keras.callbacks import EarlyStopping
 
+early_stopper = EarlyStopping(
+    monitor='val_mae',
+    patience=10,
+    restore_best_weights=True,
+    verbose=1
+)
 
 def parse_args():
     p = argparse.ArgumentParser(description="Train TCN-LSTM model and save artifacts")
-    p.add_argument("--epochs", type=int, default=100, help="Maximum number of epochs")
+    p.add_argument("--epochs", type=int, default=50, help="Maximum number of epochs")
     p.add_argument("--batch-size", type=int, default=64, help="Batch size for training")
     p.add_argument("--outdir", type=str, default=f"./outputs/tcn_lstm/{config.OUTPUT_STEPS}p", help="Base output directory")
     p.add_argument("--limit-samples", type=int, default=None, help="Limit total samples for faster runs")
@@ -57,10 +64,10 @@ def main():
         final_array = dl.read_data()
     except Exception as e:
         print(f"⚠️ Warning: failed to load data from {config.FOLDER_PATH}: {e}")
-        final_array = np.random.randn(1, getattr(config, 'SENSORS_EXPECTED', 27), 64000)
+        # final_array = np.random.randn(1, getattr(config, 'SENSORS_EXPECTED', 27), 64000)
 
     dp = DataProcess()
-    sensor_series = dp.extract_from_sensor(final_array, case_index=0)
+    sensor_series = dp.extract_from_sensor(final_array, case_index=config.CASE_INDEX)
 
     # 2️⃣ Create samples
     X_train, X_val, X_test, y_train, y_val, y_test = dp.create_sample(
@@ -87,14 +94,14 @@ def main():
     n_features = 1
     X_train_s = X_train_s.reshape((X_train_s.shape[0], X_train_s.shape[1], n_features))
     X_val_s = X_val_s.reshape((X_val_s.shape[0], X_val_s.shape[1], n_features))
-    X_test_s = X_test_s.reshape((X_test_s.shape[0], X_test_s.shape[1], n_features))
+    # X_test_s = X_test_s.reshape((X_test_s.shape[0], X_test_s.shape[1], n_features))
 
     # 4️⃣ Build model
     model = TCN_LSTM(num_blocks=6, filters=128, kernel_size=3, target_len=config.OUTPUT_STEPS)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3), loss='mse', metrics=['mae'])
     model.build(input_shape=(None, X_train_s.shape[1], X_train_s.shape[2]))
     model.summary()
-
+ 
     # 5️⃣ Train
     start_time = time.time()
     try:
@@ -104,7 +111,7 @@ def main():
             validation_data=(X_val_s, y_val_s),
             epochs=args.epochs,
             batch_size=args.batch_size,
-            verbose=1,
+            verbose=1
         )
     except Exception:
         print("❌ Training failed:")
@@ -172,7 +179,7 @@ def main():
                 plt.plot(hist.get('val_loss', []), label='Validation Loss')
                 plt.xlabel('Epochs')
                 plt.ylabel('Loss (MSE)')
-                plt.title(f"Training and Validation MSE Loss - TCN-LSTM - Missing {config.OUTPUT_STEPS}% Data")
+                plt.title(f"Training and Validation MSE Loss - TCN-LSTM - Missing {config.OUTPUT_STEPS}% Data - Case {config.CASE_INDEX}")
                 plt.legend()
                 plt.grid(True)
                 plt.tight_layout()
@@ -190,7 +197,7 @@ def main():
                 plt.plot(hist.get(f'val_{mae_key}', []), label='Validation MAE')
                 plt.xlabel('Epochs')
                 plt.ylabel('MAE')
-                plt.title(f"Training and Validation MAE - TCN-LSTM - Missing {config.OUTPUT_STEPS}% Data")
+                plt.title(f"Training and Validation MAE - TCN-LSTM - Missing {config.OUTPUT_STEPS}% Data - Case {config.CASE_INDEX}")
                 plt.legend()
                 plt.grid(True)
                 plt.tight_layout()
@@ -205,6 +212,7 @@ def main():
         "out_dir": str(run_dir),
         "training_time_s": training_time,
         "metrics": metrics if 'metrics' in locals() else {},
+        "case_index": config.CASE_INDEX
     }
     with open(run_dir / 'summary.json', 'w') as f:
         json.dump(summary, f, indent=2)
