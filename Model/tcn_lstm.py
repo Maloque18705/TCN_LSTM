@@ -52,8 +52,16 @@ class ResidualBlock(layers.Layer):
 # --- TCN + LSTM Model ---
 @register_keras_serializable(package="Model.tcn_lstm")
 class TCN_LSTM(Model):
-    def __init__(self, num_blocks=4 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.25):
-        super().__init__()
+    def __init__(self, num_blocks=4 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.25, **kwargs):
+        super().__init__(**kwargs)
+
+        # Store parameters for get_config
+        self.num_blocks = num_blocks
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.lstm_units = lstm_units
+        self.target_len = target_len
+        self.dropout_rate = dropout_rate
 
         # TCN stack
         self.tcn_blocks = tf.keras.Sequential([
@@ -75,4 +83,23 @@ class TCN_LSTM(Model):
         x = self.fc1(x)
         x = self.fc2(x)
         return self.out(x)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'num_blocks': self.num_blocks,
+            'filters': self.filters,
+            'kernel_size': self.kernel_size,
+            'lstm_units': self.lstm_units,
+            'target_len': self.target_len,
+            'dropout_rate': self.dropout_rate,
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        # Remove extra keys that are not constructor arguments
+        config = {k: v for k, v in config.items()
+                  if k in ['num_blocks', 'filters', 'kernel_size', 'lstm_units', 'target_len', 'dropout_rate']}
+        return cls(**config)
 
