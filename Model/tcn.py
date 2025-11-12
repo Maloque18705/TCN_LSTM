@@ -59,8 +59,14 @@ class ResidualBlock(tf.keras.layers.Layer):
 
 @register_keras_serializable(package="Model.tcn")
 class TCN_Model(tf.keras.Model):
-    def __init__(self, num_blocks=6, filters=64, kernel_size=3, target_len=5):
-        super().__init__()
+    def __init__(self, num_blocks=6, filters=64, kernel_size=3, target_len=5, **kwargs):
+        super().__init__(**kwargs)
+
+        # Store parameters for get_config
+        self.num_blocks = num_blocks
+        self.filters = filters
+        self.kernel_size = kernel_size
+        self.target_len = target_len
 
         self.tcn_blocks = tf.keras.Sequential()
         for i in range(num_blocks):
@@ -81,6 +87,23 @@ class TCN_Model(tf.keras.Model):
         x = self.fc1(x)
         x = self.fc2(x)
         return self.out(x)                         # (batch, target_len)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'num_blocks': self.num_blocks,
+            'filters': self.filters,
+            'kernel_size': self.kernel_size,
+            'target_len': self.target_len,
+        })
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        # Remove extra keys that are not constructor arguments
+        config = {k: v for k, v in config.items()
+                  if k in ['num_blocks', 'filters', 'kernel_size', 'target_len']}
+        return cls(**config)
 
 
 __all__ = ['ResidualBlock', 'TCN_Model']
