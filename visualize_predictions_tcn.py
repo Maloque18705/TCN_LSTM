@@ -120,10 +120,6 @@ def main():
     y_pred_real = y_pred * denom + min_scaler
     print(f"✅ Predictions converted to original scale")
 
-    # 9️⃣ Visualize
-    # n_steps = config.INPUT_STEPS # (Không cần dùng)
-    
-    # 1. THAY ĐỔI: Tạo trục x mới (0, 1, 2, 3, 4)
     time_future_adj = np.arange(config.OUTPUT_STEPS)
 
     if args.save:
@@ -132,43 +128,25 @@ def main():
         print(f"💾 Saving plots to: {plot_dir}")
 
     for i in range(num_samples):
-        # 2. THAY ĐỔI: Thu nhỏ figure
         plt.figure(figsize=(10, 4))
 
-        # 3. THAY ĐỔI: Xóa bỏ phần vẽ "Past Data (Input)"
-        # Plot past data (input) -> ĐÃ BỊ XÓA
-        # time_input = np.arange(n_steps)
-        # plt.plot(time_input, X[i], 's-', ...)
-
-        # 4. THAY ĐỔI: Dùng trục x mới (time_future_adj)
         # Plot actual future (ground truth)
-        plt.plot(time_future_adj, y_true[i], 'o-', label="Actual Future (Ground Truth)",
+        plt.plot(time_future_adj, y_true[i], 'o-', label="Actual",
                  color='blue', markersize=5, linewidth=2)
 
-        # 5. THAY ĐỔI: Dùng trục x mới (time_future_adj)
         # Plot predicted future
-        plt.plot(time_future_adj, y_pred_real[i], 'D--', label="Predicted Future",
+        plt.plot(time_future_adj, y_pred_real[i], 'D--', label="Predicted",
                  color='red', markersize=5, linewidth=2)
-
-        # 6. THAY ĐỔI: Xóa bỏ các đường nối
-        # Connect last point of past to future -> ĐÃ BỊ XÓA
-        # plt.plot([n_steps - 1, n_steps], ...)
-        # plt.plot([n_steps - 1, n_steps], ...)
-
+        
         # Formatting
         plt.axhline(0, color='black', linestyle='--', linewidth=0.8, alpha=0.5)
-        # 7. THAY ĐỔI: Xóa bỏ đường phân cách (axvline)
-        # plt.axvline(n_steps, ...) -> ĐÃ BỊ XÓA
 
-        # 8. THAY ĐỔI: Cập nhật nhãn X và Tiêu đề
         plt.xlabel("Future Time Step", fontsize=12)
         plt.ylabel("Value", fontsize=12)
         
-        # 3. THAY ĐỔI: Cập nhật tiêu đề cho TCN
-        plt.title(f"Future Prediction - Sample {i+1}/{num_samples} TCN - Missing {config.OUTPUT_STEPS}%", fontsize=14)
+        plt.title(f"Prediction for Sample {i} TCN Network - Missing {config.OUTPUT_STEPS}%", fontsize=14)
         
-        # 9. THAY ĐỔI: Di chuyển chú giải (legend)
-        plt.legend(loc='upper right', fontsize=10) # <-- THAY ĐỔI TẠI ĐÂY
+        plt.legend(loc='upper left', fontsize=10) 
         
         plt.grid(True, alpha=0.3)
         plt.tight_layout()

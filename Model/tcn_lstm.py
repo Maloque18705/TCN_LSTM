@@ -1,13 +1,14 @@
 import tensorflow as tf
 from tensorflow.keras import layers, Model
+from tensorflow.keras import regularizers
 
 # --- Residual Block ---
 class ResidualBlock(layers.Layer):
     def __init__(self, filters, kernel_size, dilation_rate, dropout_rate=0.2, **kwargs):
-        # 1. Thêm **kwargs và truyền vào super()
+
         super().__init__(**kwargs)
         
-        # 2. Lưu các tham số để dùng trong get_config
+
         self.filters = filters
         self.kernel_size = kernel_size
         self.dilation_rate = dilation_rate
@@ -53,17 +54,20 @@ class ResidualBlock(layers.Layer):
 
 # --- TCN + LSTM Model ---
 class TCN_LSTM(Model):
-    def __init__(self, num_blocks=4 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.15, **kwargs):
-        # 1. Thêm **kwargs và truyền vào super()
+    def __init__(self, num_blocks=6 , filters=64, kernel_size=3, lstm_units=64, target_len=5, dropout_rate=0.15, l2_rate=0.001, **kwargs):
+
         super().__init__(**kwargs)
         
-        # 2. Lưu các tham số để dùng trong get_config
+
         self.num_blocks = num_blocks
         self.filters = filters
         self.kernel_size = kernel_size
         self.lstm_units = lstm_units
         self.target_len = target_len
         self.dropout_rate = dropout_rate
+        self.l2_rate = l2_rate
+
+        l2_reg = regularizers.l2(self.l2_rate) if self.l2_rate > 0 else None
 
         # TCN stack
         self.tcn_blocks = tf.keras.Sequential([
@@ -72,11 +76,13 @@ class TCN_LSTM(Model):
         ])
 
         # LSTM layer
-        self.lstm = layers.LSTM(lstm_units, return_sequences=False)
+        self.lstm = layers.LSTM(lstm_units, return_sequences=False,
+                                kernel_regularizer=l2_reg,
+                                recurrent_regularizer=l2_reg)
 
         # Fully connected
-        self.fc1 = layers.Dense(128, activation='relu')
-        self.fc2 = layers.Dense(64, activation='relu')
+        self.fc1 = layers.Dense(128, activation='relu', kernel_regularizer=l2_reg)
+        self.fc2 = layers.Dense(64, activation='relu', kernel_regularizer=l2_reg)
         self.out = layers.Dense(target_len)
     
     def call(self, x, training=False):
@@ -86,7 +92,6 @@ class TCN_LSTM(Model):
         x = self.fc2(x)
         return self.out(x)
 
-    # 3. Thêm get_config
     def get_config(self):
         config = super().get_config()
         config.update({
@@ -96,5 +101,6 @@ class TCN_LSTM(Model):
             "lstm_units": self.lstm_units,
             "target_len": self.target_len,
             "dropout_rate": self.dropout_rate,
+            "l2_rate": self.l2_rate
         })
         return config

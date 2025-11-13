@@ -11,6 +11,7 @@ from Data.dataloader import DataLoader, DataProcess
 from Data import config
 from Model.tcn_lstm import TCN_Model
 from tensorflow.keras.callbacks import EarlyStopping, CSVLogger
+from tensorflow.keras.losses import Huber
 
 
 def train(epochs: int = 100, batch_size: int = 64, save_dir: str = "."):
@@ -74,7 +75,7 @@ def train(epochs: int = 100, batch_size: int = 64, save_dir: str = "."):
 
 	model.compile(
 		optimizer="adam",
-		loss='mse',
+		loss="mse",
 		metrics=["mean_absolute_error"],
 	)
 
